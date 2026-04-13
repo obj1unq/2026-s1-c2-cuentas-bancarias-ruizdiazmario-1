@@ -1,0 +1,43 @@
+import casa.*
+import cuentas.*
+
+describe "Casos de prueba" {
+    test "Saldos cuenta combinada" {
+        cuentaConGastos.saldo(200)
+        cuentaCorriente.saldo(50)
+        cuentaCombinada.asignarCuentaPrimaria(cuentaConGastos)
+        cuentaCombinada.asignarCuentaSecundaria(cuentaCorriente)
+        assert.equals(250, cuentaCombinada.saldo())
+        cuentaConGastos.saldo(-50)
+        cuentaCorriente.saldo(200)
+        assert.equals(200, cuentaCombinada.saldo())
+        cuentaConGastos.saldo(150)
+        cuentaCorriente.saldo(-20)
+        assert.equals(150, cuentaCombinada.saldo())
+        cuentaConGastos.saldo(-40)
+        cuentaCorriente.saldo(-60)
+        assert.equals(0, cuentaCombinada.saldo())
+    }
+
+    test "Gastos con la cuenta combinada" {
+        cuentaConGastos.saldo(0)
+        cuentaConGastos.costoPorOperacion(20)
+        cuentaCorriente.saldo(300)
+        cuentaCombinada.asignarCuentaPrimaria(cuentaConGastos)
+        cuentaCombinada.asignarCuentaSecundaria(cuentaCorriente)
+        casa.asignarCuenta(cuentaCombinada)
+        casa.depositar(100)
+        assert.equals(80, cuentaCombinada.saldoCuentaPrimaria())
+        assert.equals(380, casa.saldo())
+        casa.gastar(280)
+        assert.equals(280, casa.gastosDelMes())
+        assert.equals(100, casa.saldo())
+        assert.equals(0, cuentaCombinada.saldoCuentaPrimaria())
+        assert.equals(100, cuentaCombinada.saldoCuentaSecundaria())
+        casa.depositar(10)
+        assert.equals(100, casa.saldo())
+        casa.gastar(1000)
+        assert.equals(100, casa.saldo())
+        assert.equals(280, casa.gastosDelMes())
+    }
+}    

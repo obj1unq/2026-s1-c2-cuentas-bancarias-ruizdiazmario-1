@@ -1,0 +1,36 @@
+import casa.*
+import cuentas.*
+
+describe "Casos de prueba básicos" {
+  test "Gastos en casa con cuenta corriente" {
+    casa.asignarCuenta(cuentaCorriente)
+    casa.cuenta().depositar(300)
+    assert.equals(0, casa.gastosDelMes())
+    casa.gastar(200)
+    assert.equals(100, casa.saldo())
+    assert.equals(200, casa.gastosDelMes())
+    casa.gastar(400)
+    assert.equals(-300, casa.saldo())
+    assert.equals(600, casa.gastosDelMes())
+    casa.cambiarMes("mayo")
+    assert.equals(0, casa.gastosDelMes())
+  }
+
+  test "Cuenta con gastos: caso normal" {
+    cuentaConGastos.costoPorOperacion(20)
+    cuentaConGastos.depositar(1000)
+    assert.equals(980, cuentaConGastos.saldo())
+    cuentaConGastos.extraer(580)
+    assert.equals(400, cuentaConGastos.saldo())
+    cuentaConGastos.extraer(500)
+    assert.equals(-100, cuentaConGastos.saldo())
+    cuentaConGastos.depositar(150)
+    assert.equals(30, cuentaConGastos.saldo())
+  }
+}  
+
+test "Cuenta con gastos: caso excepcional" {
+    cuentaConGastos.costoPorOperacion(20)
+    cuentaConGastos.depositar(10)
+    assert.equals(0, cuentaConGastos.saldo())
+}
