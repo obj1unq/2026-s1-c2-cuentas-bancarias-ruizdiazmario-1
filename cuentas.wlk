@@ -27,12 +27,10 @@ object cuentaConGastos {
     var costoPorOperacion = 0
 
     method depositar(monto) {
-        if (self.costoPorOperacion() <= monto) {
-            saldo = saldo + monto - self.costoPorOperacion()
-        } else {
-            saldo = saldo + 0
-        }
+    if (monto >= costoPorOperacion) {
+        saldo = saldo + monto - costoPorOperacion
     }
+}
 
     method extraer(monto) {
         saldo = saldo - monto
@@ -109,23 +107,18 @@ object cuentaCombinada {
     }
 
     method extraer(monto) {
-        self.validarPago(monto)
-        if (cuentaPrimaria.saldo() >= monto) {
-            cuentaPrimaria.extraer(monto)
-        } else {
-            var resto = monto - cuentaPrimaria.saldo()
-            cuentaPrimaria.extraer(cuentaPrimaria.saldo())
-            cuentaSecundaria.extraer(resto)
+        if (self.puedeExtraer(monto)) {
+            var saldoPrimario = cuentaPrimaria.saldo()
+            if (saldoPrimario >= monto) {
+                cuentaPrimaria.extraer(monto)
+            } else {
+                var resto = monto - saldoPrimario
+                cuentaPrimaria.extraer(saldoPrimario)
+                cuentaSecundaria.extraer(resto)
+            }
         }
     }
-  
-    method validarPago(monto) {
-        if (not(self.puedeExtraer(monto))) {
-            self.error("No se puede extraer " + monto + ".")
-        }
-    }  
-
     method puedeExtraer(monto) {
-        return true
+        return self.saldoCuentaCombinada() >= monto
     }
 }
