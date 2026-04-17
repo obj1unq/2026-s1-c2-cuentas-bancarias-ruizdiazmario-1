@@ -2,35 +2,56 @@ import casa.*
 import cuentas.*
 
 describe "Casos de prueba básicos" {
-  test "Gastos en casa con cuenta corriente" {
-    casa.asignarCuenta(cuentaCorriente)
-    casa.cuenta().depositar(300)
-    assert.equals(0, casa.gastosDelMes())
-    casa.gastar(200)
-    assert.equals(100, casa.saldo())
-    assert.equals(200, casa.gastosDelMes())
-    casa.gastar(400)
-    assert.equals(-300, casa.saldo())
-    assert.equals(600, casa.gastosDelMes())
-    casa.cambiarMes("mayo")
-    assert.equals(0, casa.gastosDelMes())
-  }
 
-  test "Cuenta con gastos: caso normal" {
-    cuentaConGastos.costoPorOperacion(20)
-    cuentaConGastos.depositar(1000)
-    assert.equals(980, cuentaConGastos.saldo())
-    cuentaConGastos.extraer(580)
-    assert.equals(400, cuentaConGastos.saldo())
-    cuentaConGastos.extraer(500)
-    assert.equals(-100, cuentaConGastos.saldo())
-    cuentaConGastos.depositar(150)
-    assert.equals(30, cuentaConGastos.saldo())
-  }
-}  
+    test "Cuenta corriente" {
 
-test "Cuenta con gastos: caso excepcional" {
-    cuentaConGastos.costoPorOperacion(20)
-    cuentaConGastos.depositar(10)
-    assert.equals(0, cuentaConGastos.saldo())
+        // Casa asociada a cuenta corriente con saldo inicial 300
+        casa.asignarCuenta(cuentaCorriente)
+        casa.cuenta().depositar(300)
+
+        // No hay gastos al inicio del mes
+        assert.equals(0, casa.gastosDelMes())
+
+        // Primer gasto
+        casa.gastar(200)
+        assert.equals(100, casa.saldo())
+        assert.equals(200, casa.gastosDelMes())
+
+        // Segundo gasto (permite saldo negativo)
+        casa.gastar(400)
+        assert.equals(-300, casa.saldo())
+        assert.equals(600, casa.gastosDelMes())
+
+        // Cambio de mes reinicia los gastos
+        casa.cambiarMes("mayo")
+        assert.equals(0, casa.gastosDelMes())
+    }
+
+    test "Cuenta con gastos: caso normal" {
+
+        // Configuración de cuenta con costo por operación
+        cuentaConGastos.costoPorOperacion(20)
+
+        // Depósito con descuento de costo
+        cuentaConGastos.depositar(1000)
+        assert.equals(980, cuentaConGastos.saldo())
+
+        // Extracciones sucesivas
+        cuentaConGastos.extraer(580)
+        assert.equals(400, cuentaConGastos.saldo())
+        cuentaConGastos.extraer(500)
+        assert.equals(-100, cuentaConGastos.saldo())
+
+        // Nuevo depósito
+        cuentaConGastos.depositar(150)
+        assert.equals(30, cuentaConGastos.saldo())
+    }
+
+    test "Cuenta con gastos: caso excepcional" {
+
+        // Caso donde el depósito no alcanza para cubrir costo
+        cuentaConGastos.costoPorOperacion(20)
+        cuentaConGastos.depositar(10)
+        assert.equals(0, cuentaConGastos.saldo())
+    }
 }
