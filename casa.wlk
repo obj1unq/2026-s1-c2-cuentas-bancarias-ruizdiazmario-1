@@ -41,8 +41,10 @@ object casa {
         gastosDelMes = 0
     }
     method gastar(monto) {
-        cuenta.extraer(monto)
-        gastosDelMes = gastosDelMes + monto
+        if (cuenta.puedeExtraer(monto)) {
+            cuenta.extraer(monto)
+            gastosDelMes = gastosDelMes + monto
+        }
     }
     
     method viveres() {

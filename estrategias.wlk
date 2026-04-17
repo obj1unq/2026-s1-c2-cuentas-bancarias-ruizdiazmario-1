@@ -63,7 +63,6 @@ object estrategiaFull {
     method repararSiPuede(unaCasa) {
         if (unaCasa.hayReparacionesPendientes() &&
             self.alcanzaParaReparar(unaCasa)) {
-
             unaCasa.hacerReparaciones()
         }
     }
