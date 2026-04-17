@@ -1,0 +1,78 @@
+import casa.*
+import cuentas.*
+import estrategias.*
+
+describe "Estrategias de mantenimiento" {
+
+    test "Estrategia mínimo indispensable" {
+
+        // Setup
+        cuentaConGastos.saldo(0)
+        cuentaConGastos.costoPorOperacion(20)
+        cuentaCorriente.saldo(0)
+        cuentaCombinada.asignarCuentaPrimaria(cuentaConGastos)
+        cuentaCombinada.asignarCuentaSecundaria(cuentaCorriente)
+        casa.asignarCuenta(cuentaCombinada)
+        casa.estrategia(estrategiaMinima)
+        estrategiaMinima.calidad(3)
+        casa.viveres(30)
+        casa.registrarRotura(100)
+
+        // 1er cambio de mes → no puede comprar
+        assert.throwsException {
+            casa.cambiarMes("mayo")
+        }
+
+        // Depositar plata
+        casa.depositar(100)
+
+        // 2do cambio de mes → ahora sí puede
+        casa.cambiarMes("junio")
+
+        assert.equals(40, casa.viveres())
+        assert.equals(100, casa.reparacionesPendientes())
+        assert.equals(0, casa.gastosDelMes())
+        assert.equals(50, casa.saldo())
+     }
+
+    test "Estrategia full" {
+
+        // Setup
+        casa.asignarCuenta(cuentaCorriente)
+        casa.estrategia(estrategiaFull)
+
+        casa.cuenta().saldo(0)
+        casa.viveres(30)
+        casa.registrarRotura(100)
+
+        // 1er cambio de mes
+        casa.cambiarMes("mayo")
+
+        assert.equals(40, casa.viveres())
+        assert.equals(-50, casa.saldo())
+        assert.equals(100, casa.reparacionesPendientes())
+
+        // Depositar
+        casa.depositar(450)
+        assert.equals(400, casa.saldo())
+
+        // 2do cambio de mes
+        casa.cambiarMes("junio")
+
+        assert.equals(40, casa.viveres())
+        assert.equals(300, casa.saldo())
+        assert.equals(0, casa.reparacionesPendientes())
+
+        // 3er cambio de mes
+        casa.cambiarMes("julio")
+
+        assert.equals(100, casa.viveres())
+        assert.equals(0, casa.saldo())
+
+        // 4to cambio de mes
+        casa.cambiarMes("agosto")
+
+        assert.equals(100, casa.viveres())
+        assert.equals(0, casa.saldo())
+  }
+} 

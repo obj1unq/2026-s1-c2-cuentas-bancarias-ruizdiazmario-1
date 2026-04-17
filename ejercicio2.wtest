@@ -1,0 +1,78 @@
+import casa.*
+import cuentas.*
+
+describe "Casos de prueba" {
+
+    test "Saldos cuenta combinada" {
+
+        // Configuro los saldos iniciales de ambas cuentas
+        cuentaConGastos.saldo(200)
+        cuentaCorriente.saldo(50)
+
+        // Asigno la cuenta con gastos como primaria y la corriente como secundaria
+        cuentaCombinada.asignarCuentaPrimaria(cuentaConGastos)
+        cuentaCombinada.asignarCuentaSecundaria(cuentaCorriente)
+
+        // Caso 1: 200 + 50 = 250
+        assert.equals(250, cuentaCombinada.saldo())
+
+        // Caso 2: saldo negativos también se combinan correctamente
+        cuentaConGastos.saldo(-50)
+        cuentaCorriente.saldo(200)
+        assert.equals(200, cuentaCombinada.saldo())
+
+        // Caso 3: uno positivo y otro negativo
+        cuentaConGastos.saldo(150)
+        cuentaCorriente.saldo(-20)
+        assert.equals(150, cuentaCombinada.saldo())
+
+        // Caso 4: ambos negativos → la combinada no baja de 0
+        cuentaConGastos.saldo(-40)
+        cuentaCorriente.saldo(-60)
+        assert.equals(0, cuentaCombinada.saldo())
+    }
+
+    test "Gastos con la cuenta combinada" {
+
+        // Configuración inicial de cuentas
+        cuentaConGastos.saldo(0)
+        cuentaConGastos.costoPorOperacion(20)
+        cuentaCorriente.saldo(300)
+
+        // La casa usa una cuenta combinada
+        cuentaCombinada.asignarCuentaPrimaria(cuentaConGastos)
+        cuentaCombinada.asignarCuentaSecundaria(cuentaCorriente)
+        casa.asignarCuenta(cuentaCombinada)
+
+        // Se deposita dinero en la cuenta combinada
+        casa.depositar(100)
+
+        // El depósito afecta a la primaria descontando costo de operación
+        assert.equals(80, cuentaCombinada.saldoCuentaPrimaria())
+        assert.equals(380, casa.saldo())
+
+        // Gasto de 280: se usa primero la primaria y luego la secundaria
+        casa.gastar(280)
+
+        // Se verifica el total gastado del mes
+        assert.equals(280, casa.gastosDelMes())
+
+        // El saldo total restante es 100
+        assert.equals(100, casa.saldo())
+
+        // La primaria queda en 0 luego de agotar su saldo
+        assert.equals(0, cuentaCombinada.saldoCuentaPrimaria())
+
+        // La secundaria cubre el resto
+        assert.equals(100, cuentaCombinada.saldoCuentaSecundaria())
+
+        // Intento de depósito inválido (no cambia el saldo final)
+        casa.depositar(10)
+        assert.equals(100, casa.saldo())
+
+        // Intento de gasto inválido (no hay suficiente saldo total)
+        casa.gastar(1000)
+        assert.equals(100, casa.saldo())
+        assert.equals(280, casa.gastosDelMes())
+    }
+}

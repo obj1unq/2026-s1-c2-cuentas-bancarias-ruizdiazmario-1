@@ -1,0 +1,42 @@
+import casa.*
+import cuentas.*
+
+describe "Casa - víveres y reparaciones" {
+
+    test "Escenario completo" {
+
+        // Setup
+        casa.asignarCuenta(cuentaCorriente)
+        casa.cuenta().saldo(2000)
+        casa.viveres(30)
+
+        // 1. Romper algo de 1000
+        casa.registrarRotura(1000)
+        assert.that(not(casa.tieneViveresSuficientes()))
+        assert.that(casa.hayReparacionesPendientes())
+        assert.that(not(casa.estaEnOrden()))
+
+        // 2. Intentar comprar 80% calidad 2 (NO debería poder)
+        assert.throwsException {
+            casa.comprarViveres(80, 2)
+        }
+        assert.equals(30, casa.viveres())
+        assert.equals(2000, casa.saldo())
+        assert.equals(0, casa.gastosDelMes())
+
+        // 3. Comprar 20% calidad 2
+        casa.comprarViveres(20, 2)
+        assert.that(casa.tieneViveresSuficientes())
+        assert.equals(50, casa.viveres())
+        assert.that(not(casa.estaEnOrden()))
+        assert.equals(1960, casa.saldo())
+        assert.equals(40, casa.gastosDelMes())
+
+        // 4. Hacer reparaciones
+        casa.hacerReparaciones()
+        assert.that(not(casa.hayReparacionesPendientes()))
+        assert.that(casa.estaEnOrden())
+        assert.equals(960, casa.saldo())
+        assert.equals(1040, casa.gastosDelMes())
+    }
+}
